@@ -27,6 +27,20 @@ pub struct Server {
 
 }
 
+pub struct AppendEntriesRequest {
+    term: u64,               // Leader's term
+    leader_id: u64,          // Leader's ID
+    previous_log_index: u64, // Index of log immediately preceeding new ones
+    previous_log_term: u64,  // Term of the pervious_log_index entry
+    entries: Vec<u64>,       // Log entries to store (empty for heartbeat) TODO: Should this be an enum?
+    leader_commit: u64,      // Leader's commit_index
+}
+
+pub struct AppendEntriesResponse {
+    term: u64,    // The current term, used for updating the leader
+    success: u64, // True if follower contains prev_log_index and prev_log_term
+}
+
 fn main() {
     // Send data to socket via `$ echo "foo" | nc localhost 8080`
     let listener = TcpListener::bind("127.0.0.1:8080").unwrap();

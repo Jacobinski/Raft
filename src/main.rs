@@ -1,5 +1,4 @@
-use std::net::TcpListener;
-
+#[derive(Debug)]
 enum Mode {
     Leader{
         // Volatile state (leader only)
@@ -13,6 +12,7 @@ enum Mode {
 
 // TODO: Use the typestate pattern to provide compile-time guarantees about
 // the state of the Server. https://cliffle.com/blog/rust-typestate/
+#[derive(Debug)]
 pub struct Server {
     // Persistent State  TODO: Make this persistent
     // These fields are updated on stable storage before responding to messages.
@@ -41,11 +41,20 @@ pub struct AppendEntriesResponse {
     success: u64, // True if follower contains prev_log_index and prev_log_term
 }
 
-fn main() {
-    // Send data to socket via `$ echo "foo" | nc localhost 8080`
-    let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
-    match listener.accept() {
-        Ok((_socket, addr)) => println!("new client: {addr:?}"),
-        Err(e) => println!("cloudn't get client: {e:?}"),
+impl Server {
+    fn new() -> Self {
+        Server{
+            current_term: 0,
+            voted_for: None,
+            log: Vec::new(),
+            commit_index: 0,
+            last_applied: 0,
+            mode: Mode::Candidate,
+        }
     }
+}
+
+fn main() {
+    let server = Server::new();
+    println!("{:?}", server)
 }

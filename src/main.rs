@@ -49,7 +49,7 @@ impl Server {
             log: Vec::new(),
             commit_index: 0,
             last_applied: 0,
-            mode: Mode::Candidate,
+            mode: Mode::Follower,
         }
     }
 }

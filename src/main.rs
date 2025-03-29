@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 #[derive(Debug)]
 enum Mode {
     Leader{
@@ -25,6 +27,8 @@ pub struct Server {
     last_applied: u64, // Index of highest log entry applied to state machine
     mode: Mode,        // The mode of operation of the server
 
+    // Additional fields not mentioned in paper
+    peers: Vec<Box<dyn Node>>, // Peers which can accept raft RPCs
 }
 
 pub struct AppendEntriesRequest {
@@ -54,9 +58,9 @@ pub struct RequestVoteResponse {
 }
 
 /// The public interface of a Raft node.
-trait Node {
-    fn append_entries(req: AppendEntriesRequest) -> AppendEntriesResponse;
-    fn request_vote(req: RequestVoteRequest) -> RequestVoteResponse;
+trait Node: Debug {
+    fn append_entries(&self, req: AppendEntriesRequest) -> AppendEntriesResponse;
+    fn request_vote(&self, req: RequestVoteRequest) -> RequestVoteResponse;
 }
 
 impl Server {
@@ -68,7 +72,18 @@ impl Server {
             commit_index: 0,
             last_applied: 0,
             mode: Mode::Follower,
+            peers: Vec::new(),
         }
+    }
+}
+
+impl Node for Server {
+    fn append_entries(&self, req: AppendEntriesRequest) -> AppendEntriesResponse {
+        todo!()
+    }
+
+    fn request_vote(&self, req: RequestVoteRequest) -> RequestVoteResponse {
+        todo!()
     }
 }
 

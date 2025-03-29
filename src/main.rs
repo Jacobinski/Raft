@@ -41,6 +41,18 @@ pub struct AppendEntriesResponse {
     success: u64, // True if follower contains prev_log_index and prev_log_term
 }
 
+pub struct RequestVoteRequest {
+    term: u64,           // Candidate's term
+    candidate_id: u64,   // Candidate requesting vote
+    last_log_index: u64, // Index of candidate's last log entry
+    last_log_term: u64,  // Term of candidate's last log entry
+}
+
+pub struct RequestVoteResponse {
+    term: u64,          // Current term, for candidate to update iself
+    vote_granted: bool, // True if candidate recieves vote
+}
+
 impl Server {
     fn new() -> Self {
         Server{

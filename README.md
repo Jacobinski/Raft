@@ -1,2 +1,3 @@
 # Raft
-Toy implementation of the famous Raft Consensus Algorithm. https://raft.github.io/
+
+Implementation of the Raft consensus algorithm in Rust ⛵️ 

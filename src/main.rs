@@ -53,6 +53,12 @@ pub struct RequestVoteResponse {
     vote_granted: bool, // True if candidate recieves vote
 }
 
+/// The public interface of a Raft node.
+trait Node {
+    fn append_entries(req: AppendEntriesRequest) -> AppendEntriesResponse;
+    fn request_vote(req: RequestVoteRequest) -> RequestVoteResponse;
+}
+
 impl Server {
     fn new() -> Self {
         Server{

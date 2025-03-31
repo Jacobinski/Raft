@@ -1,21 +1,38 @@
 use std::fmt::Debug;
 
+// ServerMode is a typestate trait that controls the API of the server
+// https://cliffle.com/blog/rust-typestate
+trait ServerMode: Debug {}
+
+// An uninitialized node has no peers.
+// TODO: ... or should we allow uninitialized nodes to run solo?
 #[derive(Debug)]
-enum Mode {
-    Leader{
-        // Volatile state (leader only)
-        // This state is re-initialized after every election.
-        next_index: Vec<u64>,  // The next log entry index to send to followers
-        match_index: Vec<u64>, // Index of highest log entry known to be replicated by each follower
-    },
-    Follower,
-    Candidate,
+struct Uninitialized;
+impl ServerMode for Uninitialized {}
+
+// A follower node accepts RPCs from the leader.
+#[derive(Debug)]
+struct Follower;
+impl ServerMode for Follower {}
+
+// A candidate node is attempting to become a leader.
+#[derive(Debug)]
+struct Candidate;
+impl ServerMode for Candidate {}
+
+// A leader node controls the consensus cluster.
+#[derive(Debug)]
+struct Leader {
+    // This state is re-initialized after every election.
+    next_index: Vec<u64>,  // The next log entry index to send to followers
+    match_index: Vec<u64>, // Index of highest log entry known to be replicated by each follower
 }
+impl ServerMode for Leader {}
 
 // TODO: Use the typestate pattern to provide compile-time guarantees about
 // the state of the Server. https://cliffle.com/blog/rust-typestate/
 #[derive(Debug)]
-pub struct Server {
+pub struct Server<S: ServerMode> {
     // Persistent State  TODO: Make this persistent
     // These fields are updated on stable storage before responding to messages.
     current_term: u64,      // Latest term seen by the server
@@ -25,7 +42,7 @@ pub struct Server {
     // Volatile State
     commit_index: u64, // Index of highest log entry known to be committed
     last_applied: u64, // Index of highest log entry applied to state machine
-    mode: Mode,        // The mode of operation of the server
+    mode: S,           // The mode of operation of the server
 
     // Additional fields not mentioned in paper
     peers: Vec<Box<dyn Node>>, // Peers which can accept raft RPCs
@@ -63,7 +80,7 @@ trait Node: Debug {
     fn request_vote(&self, req: RequestVoteRequest) -> RequestVoteResponse;
 }
 
-impl Server {
+impl Server<Uninitialized> {
     fn new() -> Self {
         Server{
             current_term: 0,
@@ -71,13 +88,13 @@ impl Server {
             log: Vec::new(),
             commit_index: 0,
             last_applied: 0,
-            mode: Mode::Follower,
-            peers: Vec::new(),
+            mode: Uninitialized{},
+            peers: Vec::new(), // TODO: Should uninitialized contain peers?
         }
     }
 }
 
-impl Node for Server {
+impl<S: ServerMode> Node for Server<S> {
     fn append_entries(&self, req: AppendEntriesRequest) -> AppendEntriesResponse {
         todo!()
     }

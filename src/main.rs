@@ -89,7 +89,7 @@ impl Server<Uninitialized> {
             commit_index: 0,
             last_applied: 0,
             mode: Uninitialized{},
-            peers: Vec::new(), // TODO: Should uninitialized contain peers?
+            peers: Vec::new(),
         }
     }
 }

@@ -119,17 +119,22 @@ impl<S: ServerMode> Node for Server<S> {
 mod tests {
     use super::*;
 
+    // TODO: Create simpler constructors for unit tests
+
     #[test]
     fn append_entries_fails_for_outdated_term() {
+        let new_term = 2;
+        let old_term = 1;
+
         let mut server = Server::new();
-        server.current_term = 2;
+        server.current_term = new_term;
 
         let want = AppendEntriesResponse{
-            term: 2,
+            term: new_term,
             success: false,
         };
         let got = server.append_entries(AppendEntriesRequest{
-            term: 1, // Send an outdated term
+            term: old_term,
             leader_id: 0,
             previous_log_index: 0,
             previous_log_term: 0,

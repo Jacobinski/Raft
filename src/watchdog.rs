@@ -102,6 +102,16 @@ impl Watchdog {
     }
 }
 
+impl Drop for Watchdog {
+    fn drop(&mut self) {
+        // Stops any running thread and waits for it to finish.
+        *self.running.lock().unwrap() = false;
+        if let Some(handle) = self.handle.lock().unwrap().take() {
+            handle.join().unwrap();
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

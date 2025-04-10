@@ -1,12 +1,12 @@
 use std::net::TcpListener;
 use crate::server::Server;
-use crate::constants::LOCALHOST;
+use raft::constants::LOCALHOST;
 
 mod server;
 mod watchdog;
-mod constants;
 
 fn main() {
+    // TODO: Connect the server to the TCP socket
     let server = Server::new();
     println!("{:?}", server);
 

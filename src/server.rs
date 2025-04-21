@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 use std::cmp::Ordering;
+use serde::{Serialize, Deserialize};
 
 // ServerMode is a typestate trait that controls the API of the server
 // https://cliffle.com/blog/rust-typestate
@@ -49,7 +50,7 @@ pub struct Server<S: ServerMode> {
     peers: Vec<Box<dyn Node>>, // Peers which can accept raft RPCs
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct AppendEntriesRequest {
     term: u64,               // Leader's term
     leader_id: u64,          // Leader's ID
@@ -59,7 +60,7 @@ pub struct AppendEntriesRequest {
     leader_commit: u64,      // Leader's commit_index
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct AppendEntriesResponse {
     term: u64,     // The current term, used for updating the leader
     success: bool, // True if follower contains prev_log_index and prev_log_term
@@ -81,6 +82,19 @@ pub struct RequestVoteResponse {
 trait Node: Debug {
     fn append_entries(&mut self, req: AppendEntriesRequest) -> AppendEntriesResponse;
     fn request_vote(&mut self, req: RequestVoteRequest) -> RequestVoteResponse;
+}
+
+impl AppendEntriesRequest {
+    pub fn new() -> Self {
+        AppendEntriesRequest {
+            term: 0,
+            leader_id: 0,
+            previous_log_index: 0,
+            previous_log_term: 0,
+            entries: Vec::new(),
+            leader_commit: 0,
+        }
+    }
 }
 
 impl Server<Uninitialized> {

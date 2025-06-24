@@ -3,7 +3,6 @@ use raft::{constants::LOCALHOST, server::AppendEntriesRequest};
 use tokio::{io::AsyncReadExt, net::TcpListener};
 
 mod server;
-mod watchdog;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

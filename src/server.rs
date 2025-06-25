@@ -1,6 +1,6 @@
-use std::fmt::Debug;
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
-use serde::{Serialize, Deserialize};
+use std::fmt::Debug;
 
 // ServerMode is a typestate trait that controls the API of the server
 // https://cliffle.com/blog/rust-typestate
@@ -39,7 +39,7 @@ pub struct Server<S: ServerMode> {
     // These fields are updated on stable storage before responding to messages.
     current_term: u64,      // Latest term seen by the server
     voted_for: Option<u64>, // Candidate which recieved vote in current term
-    log: Vec<u64>,          // State machine log entries
+    pub log: Vec<u64>,      // State machine log entries
 
     // Volatile State
     commit_index: u64, // Index of highest log entry known to be committed
@@ -52,12 +52,12 @@ pub struct Server<S: ServerMode> {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct AppendEntriesRequest {
-    term: u64,               // Leader's term
-    leader_id: u64,          // Leader's ID
-    previous_log_index: u64, // Index of log immediately preceeding new ones
-    previous_log_term: u64,  // Term of the pervious_log_index entry
-    entries: Vec<u64>,       // Log entries to store (empty for heartbeat) TODO: Should this be an enum?
-    leader_commit: u64,      // Leader's commit_index
+    pub term: u64,               // Leader's term
+    pub leader_id: u64,          // Leader's ID
+    pub previous_log_index: u64, // Index of log immediately preceeding new ones
+    pub previous_log_term: u64,  // Term of the pervious_log_index entry
+    pub entries: Vec<u64>, // Log entries to store (empty for heartbeat) TODO: Should this be an enum?
+    pub leader_commit: u64, // Leader's commit_index
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -99,13 +99,13 @@ impl AppendEntriesRequest {
 
 impl Server<Uninitialized> {
     pub fn new() -> Self {
-        Server{
+        Server {
             current_term: 0,
             voted_for: None,
             log: Vec::new(),
             commit_index: 0,
             last_applied: 0,
-            mode: Uninitialized{},
+            mode: Uninitialized {},
             peers: Vec::new(),
         }
     }
@@ -114,11 +114,13 @@ impl Server<Uninitialized> {
 impl<S: ServerMode> Node for Server<S> {
     fn append_entries(&mut self, req: AppendEntriesRequest) -> AppendEntriesResponse {
         match self.current_term.cmp(&req.term) {
-            Ordering::Equal => {},
+            Ordering::Equal => {}
             Ordering::Less => self.current_term = req.term,
-            Ordering::Greater => return AppendEntriesResponse{
-                term: self.current_term,
-                success: false,
+            Ordering::Greater => {
+                return AppendEntriesResponse {
+                    term: self.current_term,
+                    success: false,
+                }
             }
         }
         todo!()
@@ -143,11 +145,11 @@ mod tests {
         let mut server = Server::new();
         server.current_term = new_term;
 
-        let want = AppendEntriesResponse{
+        let want = AppendEntriesResponse {
             term: new_term,
             success: false,
         };
-        let got = server.append_entries(AppendEntriesRequest{
+        let got = server.append_entries(AppendEntriesRequest {
             term: old_term,
             leader_id: 0,
             previous_log_index: 0,

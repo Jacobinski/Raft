@@ -1,6 +1,6 @@
 use clap::Parser;
 use raft::constants::LOCALHOST;
-use raft::server::AppendEntriesRequest;
+use raft::message::AppendEntriesRequest;
 use tokio::io::{AsyncWriteExt, Result};
 use tokio::net::TcpStream;
 

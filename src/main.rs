@@ -1,7 +1,9 @@
+use crate::message::AppendEntriesRequest;
 use crate::server::Server;
-use raft::{constants::LOCALHOST, server::AppendEntriesRequest};
+use raft::constants::LOCALHOST;
 use tokio::{io::AsyncReadExt, net::TcpListener};
 
+mod message;
 mod server;
 
 #[tokio::main]

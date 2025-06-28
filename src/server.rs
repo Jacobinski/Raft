@@ -1,4 +1,6 @@
-use serde::{Deserialize, Serialize};
+use crate::message::{
+    AppendEntriesRequest, AppendEntriesResponse, RequestVoteRequest, RequestVoteResponse,
+};
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -50,51 +52,10 @@ pub struct Server<S: ServerMode> {
     peers: Vec<Box<dyn Node>>, // Peers which can accept raft RPCs
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct AppendEntriesRequest {
-    pub term: u64,               // Leader's term
-    pub leader_id: u64,          // Leader's ID
-    pub previous_log_index: u64, // Index of log immediately preceeding new ones
-    pub previous_log_term: u64,  // Term of the pervious_log_index entry
-    pub entries: Vec<u64>, // Log entries to store (empty for heartbeat) TODO: Should this be an enum?
-    pub leader_commit: u64, // Leader's commit_index
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct AppendEntriesResponse {
-    term: u64,     // The current term, used for updating the leader
-    success: bool, // True if follower contains prev_log_index and prev_log_term
-}
-
-pub struct RequestVoteRequest {
-    term: u64,           // Candidate's term
-    candidate_id: u64,   // Candidate requesting vote
-    last_log_index: u64, // Index of candidate's last log entry
-    last_log_term: u64,  // Term of candidate's last log entry
-}
-
-pub struct RequestVoteResponse {
-    term: u64,          // Current term, for candidate to update iself
-    vote_granted: bool, // True if candidate recieves vote
-}
-
 /// The public interface of a Raft node.
 trait Node: Debug {
     fn append_entries(&mut self, req: AppendEntriesRequest) -> AppendEntriesResponse;
     fn request_vote(&mut self, req: RequestVoteRequest) -> RequestVoteResponse;
-}
-
-impl AppendEntriesRequest {
-    pub fn new() -> Self {
-        AppendEntriesRequest {
-            term: 0,
-            leader_id: 0,
-            previous_log_index: 0,
-            previous_log_term: 0,
-            entries: Vec::new(),
-            leader_commit: 0,
-        }
-    }
 }
 
 impl Server<Uninitialized> {
